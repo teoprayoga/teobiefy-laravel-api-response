@@ -23,12 +23,12 @@ abstract class TestCase extends Orchestra
      */
     protected function defineEnvironment($app): void
     {
-        $app['config']->set('api.compression.driver', 'zstd');
-        $app['config']->set('api.compression.level', 3);
-        $app['config']->set('api.compression.min_bytes', 1024);
-        $app['config']->set('api.compression.max_decompressed_bytes', 10485760);
-        $app['config']->set('api.encryption.driver', 'xchacha20-poly1305');
-        $app['config']->set('api.encryption.key', base64_encode(str_repeat('k', 32)));
-        $app['config']->set('api.encryption.allow_sodium_compat_fallback', false);
+        $app['config']->set('teobiefy.compression.driver', 'zstd');
+        $app['config']->set('teobiefy.compression.level', 3);
+        $app['config']->set('teobiefy.compression.min_bytes', 1024);
+        $app['config']->set('teobiefy.compression.max_decompressed_bytes', 10485760);
+        $app['config']->set('teobiefy.encryption.driver', 'xchacha20-poly1305');
+        $app['config']->set('teobiefy.encryption.key', base64_encode(str_repeat('k', 32)));
+        $app['config']->set('teobiefy.encryption.allow_sodium_compat_fallback', false);
     }
 }

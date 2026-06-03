@@ -1,0 +1,52 @@
+name: Tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: "8.1"
+            illuminate: "^10.0"
+            testbench: "^8.0"
+          - php: "8.2"
+            illuminate: "^11.0"
+            testbench: "^9.0"
+          - php: "8.3"
+            illuminate: "^12.0"
+            testbench: "^10.0"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: json, sodium, zstd
+          coverage: none
+
+      - name: Configure dependency matrix
+        run: |
+          composer require --no-update \
+            "illuminate/console:${{ matrix.illuminate }}" \
+            "illuminate/http:${{ matrix.illuminate }}" \
+            "illuminate/support:${{ matrix.illuminate }}" \
+            "orchestra/testbench:${{ matrix.testbench }}"
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Validate composer
+        run: composer validate --strict
+
+      - name: Run tests
+        run: composer test

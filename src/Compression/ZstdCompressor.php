@@ -12,7 +12,7 @@ class ZstdCompressor
     {
         $this->ensureAvailable();
 
-        $compressed = zstd_compress($payload, (int) config('api.compression.level', 3));
+        $compressed = zstd_compress($payload, (int) config('teobiefy.compression.level', 3));
 
         if (! is_string($compressed)) {
             throw new RuntimeException('Unable to compress API payload with zstd.');
@@ -35,7 +35,7 @@ class ZstdCompressor
             throw InvalidPayloadException::because('Unable to decompress zstd payload.');
         }
 
-        $maxBytes = (int) config('api.compression.max_decompressed_bytes', 10485760);
+        $maxBytes = (int) config('teobiefy.compression.max_decompressed_bytes', 10485760);
 
         if ($maxBytes > 0 && strlen($decompressed) > $maxBytes) {
             throw new PayloadTooLargeException('Payload too large');
@@ -46,7 +46,7 @@ class ZstdCompressor
 
     private function ensureAvailable(): void
     {
-        if (config('api.compression.driver', 'zstd') !== 'zstd') {
+        if (config('teobiefy.compression.driver', 'zstd') !== 'zstd') {
             throw new RuntimeException('Only zstd API payload compression is supported.');
         }
 

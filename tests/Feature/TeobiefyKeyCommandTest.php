@@ -22,7 +22,7 @@ class TeobiefyKeyCommandTest extends TestCase
     {
         Artisan::call('teobiefy:key');
         $output = trim(Artisan::output());
-        config()->set('api.encryption.key', substr($output, strlen('TEOBIEFY_ENCRYPTION_KEY=')));
+        config()->set('teobiefy.encryption.key', substr($output, strlen('TEOBIEFY_ENCRYPTION_KEY=')));
 
         $cipher = new PayloadCipher;
         $encrypted = $cipher->encrypt('secret');

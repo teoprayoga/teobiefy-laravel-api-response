@@ -131,7 +131,13 @@ class PayloadTransformer
 
     private function shouldCompress(string $payload): bool
     {
-        $minBytes = (int) config('api.compression.min_bytes', 1024);
+        $driver = config('teobiefy.compression.driver', 'zstd');
+
+        if ($driver === 'none') {
+            return false;
+        }
+
+        $minBytes = (int) config('teobiefy.compression.min_bytes', 1024);
 
         return $minBytes <= 0 || strlen($payload) >= $minBytes;
     }

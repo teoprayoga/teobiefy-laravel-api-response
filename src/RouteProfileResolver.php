@@ -20,8 +20,8 @@ class RouteProfileResolver
 
     private function resolve(string $direction, ?Request $request): Profile
     {
-        $default = config("api.{$direction}.default_profile", Profile::PLAIN);
-        $profiles = config("api.{$direction}.route_profiles", []);
+        $default = config("teobiefy.{$direction}.default_profile", Profile::PLAIN);
+        $profiles = config("teobiefy.{$direction}.route_profiles", []);
 
         if ($request && is_array($profiles)) {
             $matched = $this->matchRouteProfile($profiles, $request);

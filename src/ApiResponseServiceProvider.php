@@ -10,7 +10,7 @@ class ApiResponseServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/api.php', 'api');
+        $this->mergeConfigFrom(__DIR__.'/../config/teobiefy.php', 'teobiefy');
 
         $this->app->singleton(ApiInterface::class, function () {
             return new ApiResponse(
@@ -31,7 +31,7 @@ class ApiResponseServiceProvider extends ServiceProvider
         }
 
         $this->publishes([
-            __DIR__.'/../config/api.php' => config_path('api.php'),
+            __DIR__.'/../config/teobiefy.php' => config_path('teobiefy.php'),
         ], 'api-response');
 
         $this->publishes([

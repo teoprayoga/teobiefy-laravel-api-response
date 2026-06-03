@@ -55,12 +55,12 @@ class PayloadCipher
 
     private function driver(): string
     {
-        return (string) config('api.encryption.driver', 'xchacha20-poly1305');
+        return (string) config('teobiefy.encryption.driver', 'xchacha20-poly1305');
     }
 
     private function key(int $bytes): string
     {
-        $configured = config('api.encryption.key') ?: config('app.libsodium_key');
+        $configured = config('teobiefy.encryption.key') ?: config('app.libsodium_key');
 
         if (! is_string($configured) || $configured === '') {
             throw new RuntimeException('Missing API payload encryption key.');
@@ -124,7 +124,7 @@ class PayloadCipher
 
     private function allowSodiumCompatFallback(): bool
     {
-        return (bool) config('api.encryption.allow_sodium_compat_fallback', false);
+        return (bool) config('teobiefy.encryption.allow_sodium_compat_fallback', false);
     }
 
     private function encryptAesGcm(string $payload, string $nonce, string $key): string
