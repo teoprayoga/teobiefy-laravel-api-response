@@ -19,6 +19,7 @@ class PayloadDecryptMiddleware
         'nonce',
         'cipher',
         'compression',
+        'kid',
     ];
 
     public function __construct(

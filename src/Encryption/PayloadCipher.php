@@ -9,31 +9,35 @@ class PayloadCipher
 {
     private SodiumBackendFactory $sodiumBackends;
 
-    public function __construct(?SodiumBackendFactory $sodiumBackends = null)
+    private ?KeyRing $keyRing;
+
+    public function __construct(?SodiumBackendFactory $sodiumBackends = null, ?KeyRing $keyRing = null)
     {
         $this->sodiumBackends = $sodiumBackends ?? new SodiumBackendFactory;
+        $this->keyRing = $keyRing;
     }
 
     /**
-     * @return array{ciphertext: string, nonce: string, cipher: string}
+     * @return array{ciphertext: string, nonce: string, cipher: string, kid: ?string}
      */
     public function encrypt(string $payload): array
     {
         $driver = $this->driver();
-        $key = $this->key($this->keyBytes($driver));
+        $active = $this->keyRing()->active($this->keyBytes($driver));
         $nonce = random_bytes($this->nonceBytes($driver));
 
         return [
-            'ciphertext' => $this->encryptWithDriver($driver, $payload, $nonce, $key),
+            'ciphertext' => $this->encryptWithDriver($driver, $payload, $nonce, $active['bytes']),
             'nonce' => $nonce,
             'cipher' => $driver,
+            'kid' => $active['kid'],
         ];
     }
 
     /**
      * @throws InvalidPayloadException
      */
-    public function decrypt(string $payload, string $encodedNonce, mixed $envelopeCipher = null): string
+    public function decrypt(string $payload, string $encodedNonce, mixed $envelopeCipher = null, ?string $kid = null): string
     {
         $driver = $this->driver();
 
@@ -42,7 +46,7 @@ class PayloadCipher
         }
 
         $nonce = $this->base64Decode($encodedNonce, 'nonce');
-        $key = $this->key($this->keyBytes($driver));
+        $key = $this->keyRing()->resolve($kid, $this->keyBytes($driver));
 
         $decrypted = $this->decryptWithDriver($driver, $payload, $nonce, $key);
 
@@ -58,26 +62,9 @@ class PayloadCipher
         return (string) config('teobiefy.encryption.driver', 'xchacha20-poly1305');
     }
 
-    private function key(int $bytes): string
+    private function keyRing(): KeyRing
     {
-        $configured = config('teobiefy.encryption.key') ?: config('app.libsodium_key');
-
-        if (! is_string($configured) || $configured === '') {
-            throw new RuntimeException('Missing API payload encryption key.');
-        }
-
-        if (str_starts_with($configured, 'base64:')) {
-            $configured = substr($configured, strlen('base64:'));
-        }
-
-        $decoded = base64_decode($configured, true);
-        $key = $decoded !== false ? $decoded : $configured;
-
-        if (strlen($key) !== $bytes) {
-            throw new RuntimeException("API payload encryption key must be {$bytes} bytes.");
-        }
-
-        return $key;
+        return $this->keyRing ?? KeyRing::fromConfig();
     }
 
     private function keyBytes(string $driver): int

@@ -40,12 +40,18 @@ class PayloadTransformer
         if ($profile->encrypts()) {
             $encrypted = $this->cipher->encrypt($payload);
 
-            return array_merge($response, [
+            $envelope = [
                 'data_enc' => base64_encode($encrypted['ciphertext']),
                 'nonce' => base64_encode($encrypted['nonce']),
                 'cipher' => $encrypted['cipher'],
                 'compression' => $profile->compresses() ? $compression : 'none',
-            ]);
+            ];
+
+            if (($encrypted['kid'] ?? null) !== null) {
+                $envelope['kid'] = $encrypted['kid'];
+            }
+
+            return array_merge($response, $envelope);
         }
 
         return array_merge($response, [
@@ -73,7 +79,8 @@ class PayloadTransformer
             $decoded = $this->cipher->decrypt(
                 $decoded,
                 $this->requireString($payload, 'nonce'),
-                $payload['cipher'] ?? null
+                $payload['cipher'] ?? null,
+                isset($payload['kid']) && is_string($payload['kid']) && $payload['kid'] !== '' ? $payload['kid'] : null,
             );
         }
 
