@@ -7,7 +7,7 @@ Inspired by [`obiefy/api-response`](https://github.com/obiefy/api-response), wit
 ## Requirements
 
 - PHP `^8.1`
-- Laravel 10, 11, or 12
+- Laravel 10, 11, 12, or 13
 - `ext-json`
 - `ext-zstd` only when `teobiefy.compression.driver` is `zstd`
 - `ext-sodium` (recommended) **or** `paragonie/sodium_compat` (optional fallback)

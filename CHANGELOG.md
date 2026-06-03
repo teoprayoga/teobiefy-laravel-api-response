@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+### Added
+
+- Laravel 13 compatibility via Illuminate 13 constraints and Orchestra Testbench 11.
+- GitHub Actions CI coverage for the Laravel 13 / PHP 8.3 compatibility lane.
+
 ## [0.2.0] - 2026-06-03
 
 First public release on Packagist.
