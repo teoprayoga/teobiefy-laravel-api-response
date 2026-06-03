@@ -7,13 +7,19 @@ use Teoprayoga\TeobiefyLaravelApiResponse\Compression\ZstdCompressor;
 use Teoprayoga\TeobiefyLaravelApiResponse\Encryption\PayloadCipher;
 use Teoprayoga\TeobiefyLaravelApiResponse\Exceptions\InvalidPayloadException;
 use Teoprayoga\TeobiefyLaravelApiResponse\Exceptions\PayloadTooLargeException;
+use Teoprayoga\TeobiefyLaravelApiResponse\Signing\PayloadSigner;
 
 class PayloadTransformer
 {
+    private ?PayloadSigner $signer;
+
     public function __construct(
         private readonly ZstdCompressor $compressor,
         private readonly PayloadCipher $cipher,
-    ) {}
+        ?PayloadSigner $signer = null,
+    ) {
+        $this->signer = $signer;
+    }
 
     /**
      * @param  array<string, mixed>  $response
@@ -54,10 +60,21 @@ class PayloadTransformer
             return array_merge($response, $envelope);
         }
 
-        return array_merge($response, [
+        $envelope = [
             'data_comp' => base64_encode($payload),
             'compression' => $compression,
-        ]);
+        ];
+
+        if ($profile->signs()) {
+            $signature = $this->signer()->sign($payload);
+            $envelope['sig'] = base64_encode($signature['sig']);
+            $envelope['sig_alg'] = $signature['alg'];
+            if ($signature['kid'] !== null) {
+                $envelope['sig_kid'] = $signature['kid'];
+            }
+        }
+
+        return array_merge($response, $envelope);
     }
 
     /**
@@ -74,6 +91,19 @@ class PayloadTransformer
         }
 
         $decoded = $this->extractEncodedPayload($payload, $profile);
+
+        if ($profile->signs()) {
+            $this->signer()->verify(
+                $decoded,
+                $this->requireString($payload, 'sig'),
+                isset($payload['sig_alg']) && is_string($payload['sig_alg']) && $payload['sig_alg'] !== ''
+                    ? $payload['sig_alg']
+                    : 'hmac-sha256',
+                isset($payload['sig_kid']) && is_string($payload['sig_kid']) && $payload['sig_kid'] !== ''
+                    ? $payload['sig_kid']
+                    : null,
+            );
+        }
 
         if ($profile->encrypts()) {
             $decoded = $this->cipher->decrypt(
@@ -165,5 +195,10 @@ class PayloadTransformer
         }
 
         return $compression;
+    }
+
+    private function signer(): PayloadSigner
+    {
+        return $this->signer ?? ($this->signer = new PayloadSigner);
     }
 }

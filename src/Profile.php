@@ -14,6 +14,10 @@ class Profile
 
     public const COMPRESSED_ENCRYPTED = 'compressed_encrypted';
 
+    public const SIGNED = 'signed';
+
+    public const COMPRESSED_SIGNED = 'compressed_signed';
+
     public function __construct(private readonly string $name)
     {
         if (! in_array($name, self::names(), true)) {
@@ -36,6 +40,8 @@ class Profile
             self::COMPRESSED,
             self::ENCRYPTED,
             self::COMPRESSED_ENCRYPTED,
+            self::SIGNED,
+            self::COMPRESSED_SIGNED,
         ];
     }
 
@@ -46,12 +52,17 @@ class Profile
 
     public function compresses(): bool
     {
-        return in_array($this->name, [self::COMPRESSED, self::COMPRESSED_ENCRYPTED], true);
+        return in_array($this->name, [self::COMPRESSED, self::COMPRESSED_ENCRYPTED, self::COMPRESSED_SIGNED], true);
     }
 
     public function encrypts(): bool
     {
         return in_array($this->name, [self::ENCRYPTED, self::COMPRESSED_ENCRYPTED], true);
+    }
+
+    public function signs(): bool
+    {
+        return in_array($this->name, [self::SIGNED, self::COMPRESSED_SIGNED], true);
     }
 
     public function isPlain(): bool

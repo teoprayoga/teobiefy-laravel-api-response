@@ -4,7 +4,9 @@ namespace Teoprayoga\TeobiefyLaravelApiResponse;
 
 use Illuminate\Support\ServiceProvider;
 use Teoprayoga\TeobiefyLaravelApiResponse\Console\GenerateEncryptionKeyCommand;
+use Teoprayoga\TeobiefyLaravelApiResponse\Console\GenerateSigningKeyCommand;
 use Teoprayoga\TeobiefyLaravelApiResponse\Contracts\ApiInterface;
+use Teoprayoga\TeobiefyLaravelApiResponse\Signing\PayloadSigner;
 
 class ApiResponseServiceProvider extends ServiceProvider
 {
@@ -14,6 +16,7 @@ class ApiResponseServiceProvider extends ServiceProvider
 
         $this->app->singleton(AttributeProfileReader::class);
         $this->app->singleton(RouteProfileResolver::class);
+        $this->app->singleton(PayloadSigner::class);
 
         $this->app->singleton(ApiInterface::class, function () {
             return new ApiResponse(
@@ -30,6 +33,7 @@ class ApiResponseServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 GenerateEncryptionKeyCommand::class,
+                GenerateSigningKeyCommand::class,
             ]);
         }
 

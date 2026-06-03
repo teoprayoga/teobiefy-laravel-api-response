@@ -30,5 +30,7 @@ abstract class TestCase extends Orchestra
         $app['config']->set('teobiefy.encryption.driver', 'xchacha20-poly1305');
         $app['config']->set('teobiefy.encryption.key', base64_encode(str_repeat('k', 32)));
         $app['config']->set('teobiefy.encryption.allow_sodium_compat_fallback', false);
+        $app['config']->set('teobiefy.signing.algorithm', 'hmac-sha256');
+        $app['config']->set('teobiefy.signing.key', base64_encode(str_repeat('s', 32)));
     }
 }

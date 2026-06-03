@@ -53,4 +53,24 @@ return [
 
         'allow_sodium_compat_fallback' => false,
     ],
+
+    'signing' => [
+        // Currently only 'hmac-sha256' is allowed.
+        'algorithm' => 'hmac-sha256',
+
+        // Legacy single-key fallback. Used when `keys` is empty or when
+        // verifying envelopes without a `sig_kid`.
+        'key' => env('TEOBIEFY_SIGNING_KEY'),
+
+        // Named signing keys for rotation. Each value must be at least
+        // 32 bytes (raw or with `base64:` prefix).
+        'keys' => [
+            // 'v1' => env('TEOBIEFY_SIGNING_KEY_V1'),
+        ],
+
+        // When set and present in `keys`, envelopes carry this `sig_kid`
+        // and use the matching key. When null, legacy single-key mode
+        // applies and `sig_kid` is omitted.
+        'active' => env('TEOBIEFY_SIGNING_ACTIVE_KID'),
+    ],
 ];

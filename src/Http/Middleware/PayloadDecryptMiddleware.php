@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use Teoprayoga\TeobiefyLaravelApiResponse\Exceptions\InvalidPayloadException;
+use Teoprayoga\TeobiefyLaravelApiResponse\Exceptions\InvalidSignatureException;
 use Teoprayoga\TeobiefyLaravelApiResponse\Exceptions\PayloadTooLargeException;
 use Teoprayoga\TeobiefyLaravelApiResponse\PayloadTransformer;
 use Teoprayoga\TeobiefyLaravelApiResponse\RouteProfileResolver;
@@ -20,6 +21,9 @@ class PayloadDecryptMiddleware
         'cipher',
         'compression',
         'kid',
+        'sig',
+        'sig_alg',
+        'sig_kid',
     ];
 
     public function __construct(
@@ -40,6 +44,11 @@ class PayloadDecryptMiddleware
             $request->replace(array_merge($this->withoutMetadata($request->all()), $decoded));
         } catch (PayloadTooLargeException) {
             return api()->response(413, 'Payload too large', []);
+        } catch (InvalidSignatureException $exception) {
+            Log::warning($exception->getMessage());
+
+            return api()->response(401, 'Invalid signature', [])
+                ->header('WWW-Authenticate', 'TeobiefySig');
         } catch (InvalidPayloadException $exception) {
             Log::warning($exception->getMessage());
 
