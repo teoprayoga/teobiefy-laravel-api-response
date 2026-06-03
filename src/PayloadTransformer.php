@@ -2,23 +2,30 @@
 
 namespace Teoprayoga\TeobiefyLaravelApiResponse;
 
+use Illuminate\Cache\CacheManager;
 use JsonException;
 use Teoprayoga\TeobiefyLaravelApiResponse\Compression\ZstdCompressor;
 use Teoprayoga\TeobiefyLaravelApiResponse\Encryption\PayloadCipher;
 use Teoprayoga\TeobiefyLaravelApiResponse\Exceptions\InvalidPayloadException;
 use Teoprayoga\TeobiefyLaravelApiResponse\Exceptions\PayloadTooLargeException;
+use Teoprayoga\TeobiefyLaravelApiResponse\Replay\ReplayEnvelope;
+use Teoprayoga\TeobiefyLaravelApiResponse\Replay\ReplayGuard;
 use Teoprayoga\TeobiefyLaravelApiResponse\Signing\PayloadSigner;
 
 class PayloadTransformer
 {
     private ?PayloadSigner $signer;
 
+    private ?ReplayGuard $replayGuard;
+
     public function __construct(
         private readonly ZstdCompressor $compressor,
         private readonly PayloadCipher $cipher,
         ?PayloadSigner $signer = null,
+        ?ReplayGuard $replayGuard = null,
     ) {
         $this->signer = $signer;
+        $this->replayGuard = $replayGuard;
     }
 
     /**
@@ -33,6 +40,10 @@ class PayloadTransformer
 
         $payload = json_encode($response[$dataKey] ?? null, JSON_THROW_ON_ERROR);
         unset($response[$dataKey]);
+
+        if ($this->replayProtected($profile)) {
+            $payload = ReplayEnvelope::wrap($payload);
+        }
 
         $compression = 'none';
 
@@ -118,6 +129,12 @@ class PayloadTransformer
             $decoded = $this->compressor->decompress($decoded);
         }
 
+        if ($this->replayProtected($profile)) {
+            $unwrapped = ReplayEnvelope::unwrap($decoded);
+            $this->replayGuard()->assert($unwrapped['ts'], $unwrapped['rnonce']);
+            $decoded = $unwrapped['payload'];
+        }
+
         try {
             $json = json_decode($decoded, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
@@ -200,5 +217,19 @@ class PayloadTransformer
     private function signer(): PayloadSigner
     {
         return $this->signer ?? ($this->signer = new PayloadSigner);
+    }
+
+    private function replayGuard(): ReplayGuard
+    {
+        return $this->replayGuard ?? ($this->replayGuard = ReplayGuard::fromConfig(app(CacheManager::class)));
+    }
+
+    private function replayProtected(Profile $profile): bool
+    {
+        if (! $profile->encrypts() && ! $profile->signs()) {
+            return false;
+        }
+
+        return (bool) config('teobiefy.replay_protection.enabled', false);
     }
 }

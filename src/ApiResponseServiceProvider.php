@@ -3,9 +3,11 @@
 namespace Teoprayoga\TeobiefyLaravelApiResponse;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Cache\CacheManager;
 use Teoprayoga\TeobiefyLaravelApiResponse\Console\GenerateEncryptionKeyCommand;
 use Teoprayoga\TeobiefyLaravelApiResponse\Console\GenerateSigningKeyCommand;
 use Teoprayoga\TeobiefyLaravelApiResponse\Contracts\ApiInterface;
+use Teoprayoga\TeobiefyLaravelApiResponse\Replay\ReplayGuard;
 use Teoprayoga\TeobiefyLaravelApiResponse\Signing\PayloadSigner;
 
 class ApiResponseServiceProvider extends ServiceProvider
@@ -17,6 +19,7 @@ class ApiResponseServiceProvider extends ServiceProvider
         $this->app->singleton(AttributeProfileReader::class);
         $this->app->singleton(RouteProfileResolver::class);
         $this->app->singleton(PayloadSigner::class);
+        $this->app->singleton(ReplayGuard::class, fn ($app) => ReplayGuard::fromConfig($app->make(CacheManager::class)));
 
         $this->app->singleton(ApiInterface::class, function () {
             return new ApiResponse(

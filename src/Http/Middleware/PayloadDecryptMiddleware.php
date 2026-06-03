@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Teoprayoga\TeobiefyLaravelApiResponse\Exceptions\InvalidPayloadException;
 use Teoprayoga\TeobiefyLaravelApiResponse\Exceptions\InvalidSignatureException;
 use Teoprayoga\TeobiefyLaravelApiResponse\Exceptions\PayloadTooLargeException;
+use Teoprayoga\TeobiefyLaravelApiResponse\Exceptions\ReplayDetectedException;
 use Teoprayoga\TeobiefyLaravelApiResponse\PayloadTransformer;
 use Teoprayoga\TeobiefyLaravelApiResponse\RouteProfileResolver;
 
@@ -44,6 +45,10 @@ class PayloadDecryptMiddleware
             $request->replace(array_merge($this->withoutMetadata($request->all()), $decoded));
         } catch (PayloadTooLargeException) {
             return api()->response(413, 'Payload too large', []);
+        } catch (ReplayDetectedException $exception) {
+            Log::warning($exception->getMessage());
+
+            return api()->response(409, 'Replay detected', []);
         } catch (InvalidSignatureException $exception) {
             Log::warning($exception->getMessage());
 

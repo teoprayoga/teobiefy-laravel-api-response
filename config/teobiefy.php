@@ -73,4 +73,25 @@ return [
         // applies and `sig_kid` is omitted.
         'active' => env('TEOBIEFY_SIGNING_ACTIVE_KID'),
     ],
+
+    'replay_protection' => [
+        // When true, encrypted and signed profiles wrap their payload
+        // with an inner {ts, rnonce, payload} envelope (covered by AEAD
+        // or HMAC) and reject duplicate nonces / stale timestamps on
+        // decode. Plain and compressed-only profiles are never wrapped.
+        'enabled' => env('TEOBIEFY_REPLAY_PROTECTION', false),
+
+        // null => default cache store. Override per environment when
+        // the default driver is not shared across workers.
+        'cache_store' => null,
+
+        'cache_prefix' => 'teobiefy:rp:',
+
+        // +/- skew tolerance in seconds.
+        'window_seconds' => 300,
+
+        // How long to remember a nonce. Must be at least 2 * window_seconds
+        // so a nonce cannot be replayed at the trailing edge of the window.
+        'nonce_ttl_seconds' => 600,
+    ],
 ];
