@@ -3,11 +3,16 @@
 namespace Teoprayoga\TeobiefyLaravelApiResponse;
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class RouteProfileResolver
 {
+    public function __construct(
+        private readonly ?AttributeProfileReader $attributeReader = null,
+    ) {}
+
     public function responseProfile(?Request $request = null): Profile
     {
         return $this->resolve('response', $request);
@@ -20,6 +25,19 @@ class RouteProfileResolver
 
     private function resolve(string $direction, ?Request $request): Profile
     {
+        if ($request !== null && $this->attributeReader !== null) {
+            $route = $request->route();
+            if ($route instanceof Route) {
+                $attributeName = $direction === 'response'
+                    ? $this->attributeReader->forResponse($route)
+                    : $this->attributeReader->forRequest($route);
+
+                if ($attributeName !== null) {
+                    return Profile::from($attributeName);
+                }
+            }
+        }
+
         $default = config("teobiefy.{$direction}.default_profile", Profile::PLAIN);
         $profiles = config("teobiefy.{$direction}.route_profiles", []);
 

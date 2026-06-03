@@ -12,6 +12,9 @@ class ApiResponseServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../config/teobiefy.php', 'teobiefy');
 
+        $this->app->singleton(AttributeProfileReader::class);
+        $this->app->singleton(RouteProfileResolver::class);
+
         $this->app->singleton(ApiInterface::class, function () {
             return new ApiResponse(
                 $this->app->make(PayloadTransformer::class),
