@@ -28,8 +28,13 @@ class PayloadTransformer
         $payload = json_encode($response[$dataKey] ?? null, JSON_THROW_ON_ERROR);
         unset($response[$dataKey]);
 
+        $compression = 'none';
+
         if ($profile->compresses()) {
-            $payload = $this->compressor->compress($payload);
+            if ($this->shouldCompress($payload)) {
+                $payload = $this->compressor->compress($payload);
+                $compression = 'zstd';
+            }
         }
 
         if ($profile->encrypts()) {
@@ -39,13 +44,13 @@ class PayloadTransformer
                 'data_enc' => base64_encode($encrypted['ciphertext']),
                 'nonce' => base64_encode($encrypted['nonce']),
                 'cipher' => $encrypted['cipher'],
-                'compression' => $profile->compresses() ? 'zstd' : 'none',
+                'compression' => $profile->compresses() ? $compression : 'none',
             ]);
         }
 
         return array_merge($response, [
             'data_comp' => base64_encode($payload),
-            'compression' => 'zstd',
+            'compression' => $compression,
         ]);
     }
 
@@ -72,7 +77,7 @@ class PayloadTransformer
             );
         }
 
-        if ($profile->compresses()) {
+        if ($profile->compresses() && $this->payloadCompression($payload) === 'zstd') {
             $decoded = $this->compressor->decompress($decoded);
         }
 
@@ -122,5 +127,30 @@ class PayloadTransformer
         }
 
         return $decoded;
+    }
+
+    private function shouldCompress(string $payload): bool
+    {
+        $minBytes = (int) config('api.compression.min_bytes', 1024);
+
+        return $minBytes <= 0 || strlen($payload) >= $minBytes;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function payloadCompression(array $payload): string
+    {
+        $compression = $payload['compression'] ?? 'zstd';
+
+        if (! is_string($compression) || $compression === '') {
+            throw InvalidPayloadException::because('Payload compression metadata is invalid.');
+        }
+
+        if (! in_array($compression, ['zstd', 'none'], true)) {
+            throw InvalidPayloadException::because("Unsupported payload compression [{$compression}].");
+        }
+
+        return $compression;
     }
 }

@@ -25,7 +25,7 @@ return [
     'compression' => [
         'driver' => 'zstd',
         'level' => 3,
-        'min_bytes' => 0,
+        'min_bytes' => 1024,
         'max_decompressed_bytes' => 10485760,
     ],
 

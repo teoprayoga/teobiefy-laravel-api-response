@@ -66,6 +66,10 @@ class PayloadCipher
             throw new RuntimeException('Missing API payload encryption key.');
         }
 
+        if (str_starts_with($configured, 'base64:')) {
+            $configured = substr($configured, strlen('base64:'));
+        }
+
         $decoded = base64_decode($configured, true);
         $key = $decoded !== false ? $decoded : $configured;
 

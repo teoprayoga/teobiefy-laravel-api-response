@@ -11,6 +11,11 @@
             "src/helpers.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Teoprayoga\\TeobiefyLaravelApiResponse\\Tests\\": "tests/"
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [
@@ -25,8 +30,17 @@
         "php": "^8.1",
         "ext-json": "*",
         "ext-zstd": "*",
+        "illuminate/console": "^10.0|^11.0|^12.0",
         "illuminate/http": "^10.0|^11.0|^12.0",
         "illuminate/support": "^10.0|^11.0|^12.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0|^10.0"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:unit": "phpunit --testsuite=Unit",
+        "test:feature": "phpunit --testsuite=Feature"
     },
     "suggest": {
         "ext-sodium": "Required for native xchacha20-poly1305 and chacha20-poly1305-ietf payload encryption.",

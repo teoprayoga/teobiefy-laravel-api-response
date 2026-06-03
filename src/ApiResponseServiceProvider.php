@@ -3,6 +3,7 @@
 namespace Teoprayoga\TeobiefyLaravelApiResponse;
 
 use Illuminate\Support\ServiceProvider;
+use Teoprayoga\TeobiefyLaravelApiResponse\Console\GenerateEncryptionKeyCommand;
 use Teoprayoga\TeobiefyLaravelApiResponse\Contracts\ApiInterface;
 
 class ApiResponseServiceProvider extends ServiceProvider
@@ -22,6 +23,12 @@ class ApiResponseServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'api-response');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                GenerateEncryptionKeyCommand::class,
+            ]);
+        }
 
         $this->publishes([
             __DIR__.'/../config/api.php' => config_path('api.php'),
