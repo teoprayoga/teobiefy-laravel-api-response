@@ -3,6 +3,30 @@
     "description": "Laravel API response helpers with server-configured payload compression and encryption.",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "laravel",
+        "api-response",
+        "encryption",
+        "libsodium",
+        "xchacha20-poly1305",
+        "zstd",
+        "hmac",
+        "signing",
+        "replay-protection",
+        "key-rotation"
+    ],
+    "homepage": "https://github.com/teoprayoga/teobiefy-laravel-api-response",
+    "authors": [
+        {
+            "name": "Teo Prayoga",
+            "email": "teo@undiksha.ac.id",
+            "role": "Maintainer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/teoprayoga/teobiefy-laravel-api-response/issues",
+        "source": "https://github.com/teoprayoga/teobiefy-laravel-api-response"
+    },
     "autoload": {
         "psr-4": {
             "Teoprayoga\\TeobiefyLaravelApiResponse\\": "src/"
