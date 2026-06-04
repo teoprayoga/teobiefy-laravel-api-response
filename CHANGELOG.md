@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-04
+
 ### Added
 
 - Laravel 13 compatibility via Illuminate 13 constraints and Orchestra Testbench 11.
@@ -37,5 +39,6 @@ First public release on Packagist.
 - Default profile remains `plain`; key rotation, signing, and replay protection are all opt-in via configuration.
 - See [`UPGRADE.md`](UPGRADE.md) for guidance migrating from internal prerelease usage.
 
-[Unreleased]: https://github.com/teoprayoga/teobiefy-laravel-api-response/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/teoprayoga/teobiefy-laravel-api-response/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/teoprayoga/teobiefy-laravel-api-response/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/teoprayoga/teobiefy-laravel-api-response/releases/tag/v0.2.0
